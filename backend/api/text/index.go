@@ -23,7 +23,7 @@ func handleRead(rw http.ResponseWriter, r *http.Request) {
 	id := parseIdFromUrl(r)
 	post := findPost(id)
 	rw.Header().Set("Content-Type", "application/json")
-	rw.WriteHeader(http.StatusCreated)
+	rw.WriteHeader(http.StatusOK)
 	if getIdFromUrl(r) == "" {
 		json.NewEncoder(rw).Encode(&Results{"", "GET", true, getAllPosts()})
 		return
@@ -39,7 +39,7 @@ func handleUpdate(rw http.ResponseWriter, r *http.Request) {
 	success := updatePost(post, id)
 
 	rw.Header().Set("Content-Type", "application/json")
-	rw.WriteHeader(http.StatusCreated)
+	rw.WriteHeader(http.StatusNoContent)
 	json.NewEncoder(rw).Encode(&Result{"", "PUT", success, findPost(id)})
 }
 func handleDelete(rw http.ResponseWriter, r *http.Request) {
@@ -48,7 +48,7 @@ func handleDelete(rw http.ResponseWriter, r *http.Request) {
 	success := removePost(id)
 
 	rw.Header().Set("Content-Type", "application/json")
-	rw.WriteHeader(http.StatusCreated)
+	rw.WriteHeader(http.StatusNoContent)
 	json.NewEncoder(rw).Encode(&Result{"", "DELETE", success, findPost(id)})
 }
 
@@ -66,8 +66,6 @@ func parseIdFromUrl(r *http.Request) int {
 
 func TextHandler(rw http.ResponseWriter, r *http.Request) {
 
-	fmt.Println(parseIdFromUrl(r))
-
 	switch r.Method {
 	case "GET":
 		handleRead(rw, r)
@@ -78,7 +76,7 @@ func TextHandler(rw http.ResponseWriter, r *http.Request) {
 	case "DELETE":
 		handleDelete(rw, r)
 	default:
-		rw.WriteHeader(http.StatusBadRequest)
+		rw.WriteHeader(http.StatusMethodNotAllowed)
 		fmt.Fprint(rw, "Invalid Method ("+r.Method+")")
 	}
 }
