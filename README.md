@@ -61,7 +61,7 @@ func parseIdFromUrl(r *http.Request) int {
 
 func TextHandler(rw http.ResponseWriter, r *http.Request) {
 
-	switch r.Method {
+switch r.Method {
 	case "GET":
 		handleRead(rw, r)
 	case "POST":
