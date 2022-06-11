@@ -1,6 +1,7 @@
 package image
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -8,7 +9,8 @@ import (
 	"strconv"
 )
 
-var imgOutDir = "./../../../data/database/images"
+var DIR, _ = os.Getwd()
+var imgOutDir = DIR + "/../data/database/images"
 var Posts Database = make(Database)
 
 func fetchPost(post *Post) []byte {
@@ -35,6 +37,7 @@ func idIsOk(id int) bool {
 	return Posts[id] != nil
 
 }
+
 func getAllPosts() Database {
 	return Posts
 }
@@ -47,32 +50,49 @@ func findPost(id int) *Post {
 	}
 }
 
-func addPost(post *Post, imgBytes multipart.File) bool {
-	return addPostById(post, len(Posts), imgBytes)
+func createFilePath(id int) string {
+	return strconv.Itoa(id) + ".png"
+}
+
+func addPost(imgBytes multipart.File) bool {
+	var id = len(Posts)
+	var path = createFilePath(id)
+	var post = NewPost(path, path)
+	return addPostById(post, id, imgBytes)
 }
 
 func store(path string, imgBytes multipart.File) bool {
 
 	if temp, err := os.Create(imgOutDir + "/" + path); err == nil {
+
 		defer temp.Close()
 		if _, err := io.Copy(temp, imgBytes); err == nil {
 			return true
+		} else {
+			fmt.Println(err)
+			return false
 		}
+	} else {
+		fmt.Println(err)
+		return false
 	}
-	return false
 }
 
 func addPostById(post *Post, id int, imgBytes multipart.File) bool {
-	store(post.Path, imgBytes)
-	Posts[id] = post
-	return true
+	success := store(post.Path, imgBytes)
+	if success {
+		Posts[id] = post
+	}
+	return success
 }
 
-func updatePost(post *Post, id int, imgBytes multipart.File) bool {
+func updatePost(id int, imgBytes multipart.File) bool {
 	if !idIsOk(id) {
 		return false
 	}
 	deleteItem(id)
+	path := createFilePath(id)
+	post := NewPost(path, path)
 	return addPostById(post, id, imgBytes)
 }
 

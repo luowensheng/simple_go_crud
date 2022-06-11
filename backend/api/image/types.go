@@ -20,3 +20,7 @@ type Post struct {
 }
 
 type Database = map[int]*Post
+
+func NewPost(path, outpath string) *Post {
+	return &Post{path, outpath}
+}
